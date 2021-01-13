@@ -5,12 +5,9 @@ import networkx as nx
 
 class PlotProcess:
 
-
     def __init__(self,environment,W,H):
         self.G = self.create_graph(environment)
         self.fig = plt.figure(figsize = (W,H))
-        self.fig = plt.gcf()
-
 
     def create_graph(self,environment):
         G = nx.DiGraph()
@@ -45,8 +42,7 @@ class PlotProcess:
             nx.draw_networkx_edge_labels(Gi,posi,edge_labels = labeli)
             nx.draw_networkx_edges(Gi, posi,edgelist = ag.get_path(),width=6, alpha=0.5, edge_color='r', style='dashed')
 
-
-        plt.show(block)
-        if block == False:
-            plt.pause(sleep)
-            plt.clf()
+        plt.ion()
+        plt.show()
+        plt.pause(sleep)
+        plt.clf()
