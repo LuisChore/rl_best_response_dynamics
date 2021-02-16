@@ -5,6 +5,7 @@ class Agent:
         self.index = index
         self.cost = float("inf")
         self.path = []
+        self.cost_by_iteration = []
         self.edges_used = {}
 
     def __str__(self):
@@ -23,6 +24,8 @@ class Agent:
     def get_index(self):
         return self.index
 
+    def add_cost(self):
+        self.cost_by_iteration.append(self.cost)
 
     def get_path(self):
         edgelist = []

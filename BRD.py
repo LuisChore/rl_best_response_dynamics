@@ -9,10 +9,12 @@ class BRD:
 
     def __init__(self,graph,agents,source):
         self.agents = [ Agent(a) for a in agents]
-        self.source = source
+        self.cost_by_iteration = []
         self.graph = graph
         self.plotProcess = PlotProcess(graph,len(agents))
         self.total_cost = float("inf")
+        self.source = source
+
         self.plotProcess.draw_plot([],self.source,self.total_cost,title = "Original")
         self.Edges = self.initialize_edges(graph)
         #dictionary to know how many agents are using every edge
@@ -33,9 +35,11 @@ class BRD:
             find_better_path = False
             for u in self.agents:
                 find = self.find_path(u)
+                u.add_cost()
                 if find == True:
                     find_better_path = True
             self.evaluate_totalcost()
+            self.cost_by_iteration.append(self.total_cost);
             title = "Iteration: " + str(it)
             self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,title = title)
             it+=1
@@ -124,6 +128,7 @@ def main():
     source = int(f.readline())
     brd = BRD(g,agent_list,source)
     brd()
+    brd.plotProcess.plot_metrics(brd.agents,brd.source,brd.cost_by_iteration)
     brd.plotProcess.draw_plot(brd.agents,brd.source,brd.total_cost,block = True)
 
 if __name__ == "__main__":
