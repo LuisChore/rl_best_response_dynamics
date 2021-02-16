@@ -7,54 +7,50 @@ import time
 
 class BRD:
 
-    def __init__(self,environment,agents,target):
+    def __init__(self,graph,agents,source):
         self.agents = [ Agent(a) for a in agents]
-        self.target = target
-        self.environment = environment
-        self.plotProcess = PlotProcess(environment,len(agents))
+        self.source = source
+        self.graph = graph
+        self.plotProcess = PlotProcess(graph,len(agents))
         self.total_cost = float("inf")
-        self.plotProcess.draw_plot([],self.target,self.total_cost,title = "Original")
-        self.Edges = self.initialize_edges(environment)
+        self.plotProcess.draw_plot([],self.source,self.total_cost,title = "Original")
+        self.Edges = self.initialize_edges(graph)
         #dictionary to know how many agents are using every edge
 
-
-
-    def initialize_edges(self,environment):
+    def initialize_edges(self,graph):
         Edges = {}
-        for u in range(environment.nodes):
-            for v,w in environment.adj[u]:
+        for u in range(graph.nodes):
+            for v,w in graph.adj[u]:
                 i = min(u,v)
                 j = max(u,v)
                 Edges[(i,j)] = (w,0)
         return Edges
 
-
-    def process(self):
-        found = True
+    def __call__(self):
+        find_better_path = True
         it = 1
-        while found == True:
-            found = False
+        while find_better_path == True:
+            find_better_path = False
             for u in self.agents:
-                ok = self.find_path(u)
-                if ok == True:
-                    found = True
-            self.evaluate_total_cost()
+                find = self.find_path(u)
+                if find == True:
+                    find_better_path = True
+            self.evaluate_totalcost()
             title = "Iteration: " + str(it)
-            self.plotProcess.draw_plot(self.agents,self.target,self.total_cost,title = title)
+            self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,title = title)
             it+=1
         for u in self.agents:
             print(u)
         print("Total cost: " + str(self.total_cost))
 
-
-    def update_edges(self,agent,change):
+    def update_edges(self,agent,change = True):
         l = len(agent.path)
         for i in range(0,l-1):
             u = min(agent.path[i],agent.path[i + 1])
             v = max(agent.path[i],agent.path[i + 1])
 
             w,h = self.Edges[(u,v)]
-            if change == -1:
+            if change == False:
                 self.Edges[(u,v)] = (w,h-1)
                 del agent.edges_used[(u,v)]
             else:
@@ -64,33 +60,33 @@ class BRD:
     def find_path(self,agent):
         index = agent.index
         prev_cost = agent.cost
-        dist = [float("inf") for i in range(self.environment.nodes)]
-        parent = [-1 for i in range(self.environment.nodes)]
-        dist[self.target] = 0
-        parent[self.target] = self.target
+        dist = [float("inf") for i in range(self.graph.nodes)]
+        parent = [-1 for i in range(self.graph.nodes)]
+        dist[self.source] = 0
+        parent[self.source] = self.source
         PQ = queue.PriorityQueue()
-        PQ.put((0,self.target))
+        PQ.put((0,self.source))
         while PQ.empty() == False:
             w,u = PQ.get()
             if dist[u] < w:
                 continue
-            for v,c in self.environment.adj[u]:
-                real_c = self.get_real_cost(u,v,agent.contain_edge(u,v))
-                if dist[v] > dist[u] + real_c:
+            for v,c in self.graph.adj[u]:
+                realcost = self.get_realcost(u,v,agent.contain_edge(u,v))
+                if dist[v] > dist[u] + realcost:
                     parent[v] = u
-                    dist[v] = dist[u] + real_c
+                    dist[v] = dist[u] + realcost
                     PQ.put((dist[v],v))
 
         if dist[index] >= prev_cost:
             return False
+
         new_path = []
         self.create_path(index,parent,new_path)
-        self.update_edges(agent,-1)
+        self.update_edges(agent,False)
         agent.path = new_path
-        self.update_edges(agent,1)
+        self.update_edges(agent,True)
         agent.cost = dist[index]
         return True
-
 
     def create_path(self,u,parent,new_path):
         if parent[u] == u:
@@ -99,7 +95,7 @@ class BRD:
         new_path.append(u)
         self.create_path(parent[u],parent,new_path)
 
-    def get_real_cost(self,u,v,contained):
+    def get_realcost(self,u,v,contained):
         i = min(u,v)
         j = max(u,v)
         w,h = self.Edges[(i,j)]
@@ -108,7 +104,7 @@ class BRD:
         else:
             return (w/(h+1))
 
-    def evaluate_total_cost(self):
+    def evaluate_totalcost(self):
         ans = 0
         for key in self.Edges:
             w,h = self.Edges[key]
@@ -116,9 +112,6 @@ class BRD:
                 ans += w
         self.total_cost = ans
         return ans
-
-
-
 
 def main():
     f = open("example.txt", "r")
@@ -128,12 +121,10 @@ def main():
         u,v,w = f.readline().split()
         g.add_edge(int(u),int(v),int(w))
     agent_list = [int(x) for x in f.readline().split()]
-    target = int(f.readline())
-    brd = BRD(g,agent_list,target)
-    brd.process()
-    brd.plotProcess.draw_plot(brd.agents,brd.target,brd.total_cost,block = True)
-
-
+    source = int(f.readline())
+    brd = BRD(g,agent_list,source)
+    brd()
+    brd.plotProcess.draw_plot(brd.agents,brd.source,brd.total_cost,block = True)
 
 if __name__ == "__main__":
     main()

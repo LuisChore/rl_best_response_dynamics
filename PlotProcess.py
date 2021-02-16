@@ -29,7 +29,7 @@ class PlotProcess:
                 G.add_edge(u,v,weight = w)
         return G
 
-    def draw_plot(self,agent_list,target,total_cost,block = False, sleep = 2,title = "Nash Equilibrium"):
+    def draw_plot(self,agent_list,source,total_cost,block = False, sleep = 2,title = "Nash Equilibrium"):
         if block == True:
             plt.ioff()
         else:
@@ -40,7 +40,7 @@ class PlotProcess:
         # plot original
         pos = nx.planar_layout(self.G)
         g = self.fig.add_subplot(self.r,self.c,1)
-        g.title.set_text("Target: " + str(target) + ", Total cost: "+ str(total_cost))
+        g.title.set_text("Source: " + str(source) + ", Total cost: "+ str(total_cost))
         nx.draw(self.G,pos,with_labels = True)
         labels = nx.get_edge_attributes(self.G,'weight')
         nx.draw_networkx_edge_labels(self.G,pos,edge_labels = labels)
