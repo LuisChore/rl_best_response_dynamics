@@ -7,11 +7,11 @@ import time
 
 class BRD:
 
-    def __init__(self,environment,agents,target,W = 10, H = 8):
+    def __init__(self,environment,agents,target):
         self.agents = [ Agent(a) for a in agents]
         self.target = target
         self.environment = environment
-        self.plotProcess = PlotProcess(environment,W,H)
+        self.plotProcess = PlotProcess(environment,len(agents))
         self.total_cost = float("inf")
         self.plotProcess.draw_plot([],self.target,self.total_cost,title = "Original")
         self.Edges = self.initialize_edges(environment)
@@ -137,18 +137,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-    
-'''
-Ejemplo 12.9
-4 5
-2 0 1
-3 0 3
-2 1 1
-3 1 5
-3 2 4
-0 1
-3
-
-'''

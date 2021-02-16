@@ -1,40 +1,55 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-
-
 class PlotProcess:
 
-    def __init__(self,environment,W,H):
-        self.G = self.create_graph(environment)
+    def __init__(self,graph,number_of_agents):
+        self.G = self.create_graph(graph)
+        W,H,self.r,self.c = self.choose_figsize(number_of_agents)
         self.fig = plt.figure(figsize = (W,H))
 
-    def create_graph(self,environment):
+    def choose_figsize(self,number_of_agents):
+        if number_of_agents == 1:
+            return 8,4,1,2
+        elif number_of_agents == 2:
+            return 12,4,1,3
+        elif number_of_agents == 3:
+            return 4,4,2,2
+        elif number_of_agents <= 5:
+            return 12,8,2,3
+        else:
+            return 12,8,3,3
+
+    def create_graph(self,graph):
         G = nx.DiGraph()
-        for i in range(environment.nodes):
+        for i in range(graph.nodes):
             G.add_node(i)
-        for u in range(environment.nodes):
-            for v,w in environment.adj[u]:
+        for u in range(graph.nodes):
+            for v,w in graph.adj[u]:
                 G.add_edge(u,v,weight = w)
         return G
 
     def draw_plot(self,agent_list,target,total_cost,block = False, sleep = 2,title = "Nash Equilibrium"):
+        if block == True:
+            plt.ioff()
+        else:
+            plt.ion()
+
         self.fig.canvas.set_window_title(title)
-
-
         number_of_agents = len(agent_list)
-        ## original
+        # plot original
         pos = nx.planar_layout(self.G)
-        g = self.fig.add_subplot(3,3,1)
+        g = self.fig.add_subplot(self.r,self.c,1)
         g.title.set_text("Target: " + str(target) + ", Total cost: "+ str(total_cost))
         nx.draw(self.G,pos,with_labels = True)
         labels = nx.get_edge_attributes(self.G,'weight')
         nx.draw_networkx_edge_labels(self.G,pos,edge_labels = labels)
 
+        #plot agents
         for i,ag in zip(range(2,2 + number_of_agents),agent_list):
             Gi = self.G
             posi = nx.planar_layout(Gi)
-            gi = self.fig.add_subplot(3,3,i)
+            gi = self.fig.add_subplot(self.r,self.c,i)
             title = "Agent Index: " + str(ag.get_index()) + ", Cost: " + str(ag.get_cost())
             gi.title.set_text(title)
             nx.draw(Gi,posi,with_labels=True)
@@ -42,7 +57,7 @@ class PlotProcess:
             nx.draw_networkx_edge_labels(Gi,posi,edge_labels = labeli)
             nx.draw_networkx_edges(Gi, posi,edgelist = ag.get_path(),width=6, alpha=0.5, edge_color='r', style='dashed')
 
-        plt.ion()
         plt.show()
-        plt.pause(sleep)
-        plt.clf()
+        if block == False:
+            plt.pause(sleep)
+            plt.clf()
