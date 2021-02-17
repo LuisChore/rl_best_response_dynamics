@@ -7,8 +7,12 @@ class PlotProcess:
         self.G = self.create_graph(graph)
         self.W,self.H,self.r,self.c = self.choose_figsize(number_of_agents)
 
-    def plot_graph(self):
+    def plot_graph(self,agents,source):
         plt.ioff()
+        self.fig = plt.figure(figsize = (6,5))
+        label = '\n'.join(("Agents: " + str(agents), "Source: " + str(source)))
+        self.fig.canvas.set_window_title('Graph')
+        self.fig.text(0.01,0.90, label)
         pos = nx.planar_layout(self.G)
         nx.draw(self.G,pos,with_labels = True)
         labels = nx.get_edge_attributes(self.G,'weight')
