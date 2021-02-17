@@ -14,8 +14,6 @@ class BRD:
         self.plotProcess = PlotProcess(graph,len(agents))
         self.total_cost = float("inf")
         self.source = source
-
-        self.plotProcess.draw_plot([],self.source,self.total_cost,title = "Original")
         self.Edges = self.initialize_edges(graph)
         #dictionary to know how many agents are using every edge
 
@@ -29,7 +27,9 @@ class BRD:
         return Edges
 
     def __call__(self):
+        self.plotProcess.set_plot()
         find_better_path = True
+        self.plotProcess.draw_plot([],self.source,self.total_cost,title = "Original")
         it = 1
         while find_better_path == True:
             find_better_path = False
@@ -43,9 +43,6 @@ class BRD:
             title = "Iteration: " + str(it)
             self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,title = title)
             it+=1
-        for u in self.agents:
-            print(u)
-        print("Total cost: " + str(self.total_cost))
 
     def update_edges(self,agent,change = True):
         l = len(agent.path)
@@ -116,20 +113,3 @@ class BRD:
                 ans += w
         self.total_cost = ans
         return ans
-
-def main():
-    f = open("example.txt", "r")
-    nodes,edges = f.readline().split()
-    g = Graph(int(nodes),True)
-    for i in range(int(edges)):
-        u,v,w = f.readline().split()
-        g.add_edge(int(u),int(v),int(w))
-    agent_list = [int(x) for x in f.readline().split()]
-    source = int(f.readline())
-    brd = BRD(g,agent_list,source)
-    brd()
-    brd.plotProcess.plot_metrics(brd.agents,brd.source,brd.cost_by_iteration)
-    brd.plotProcess.draw_plot(brd.agents,brd.source,brd.total_cost,block = True)
-
-if __name__ == "__main__":
-    main()

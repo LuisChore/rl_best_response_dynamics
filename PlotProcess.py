@@ -5,8 +5,15 @@ class PlotProcess:
 
     def __init__(self,graph,number_of_agents):
         self.G = self.create_graph(graph)
-        W,H,self.r,self.c = self.choose_figsize(number_of_agents)
-        self.fig = plt.figure(figsize = (W,H))
+        self.W,self.H,self.r,self.c = self.choose_figsize(number_of_agents)
+
+    def plot_graph(self):
+        plt.ioff()
+        pos = nx.planar_layout(self.G)
+        nx.draw(self.G,pos,with_labels = True)
+        labels = nx.get_edge_attributes(self.G,'weight')
+        nx.draw_networkx_edge_labels(self.G,pos,edge_labels = labels)
+        plt.show()
 
     def choose_figsize(self,number_of_agents):
         if number_of_agents == 1:
@@ -29,8 +36,12 @@ class PlotProcess:
                 G.add_edge(u,v,weight = w)
         return G
 
+    def set_plot(self):
+        self.fig = plt.figure(figsize = (self.W,self.H))
+
     def plot_metrics(self,agent_list,source,costs):
         plt.ioff()
+        self.set_plot()
         self.fig.canvas.set_window_title('Costs by iteration')
         number_of_agents = len(agent_list)
         # plot system cost
@@ -49,6 +60,7 @@ class PlotProcess:
 
     def draw_plot(self,agent_list,source,total_cost,block = False, sleep = 2,title = "Nash Equilibrium"):
         if block == True:
+            self.set_plot()
             plt.ioff()
         else:
             plt.ion()
