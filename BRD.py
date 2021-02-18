@@ -113,3 +113,9 @@ class BRD:
                 ans += w
         self.total_cost = ans
         return ans
+
+    def plot_metrics(self):
+        self.plotProcess.plot_metrics(self.agents,self.source,self.cost_by_iteration)
+
+    def plot_status(self):
+        self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,block = True)

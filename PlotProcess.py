@@ -50,12 +50,14 @@ class PlotProcess:
         number_of_agents = len(agent_list)
         # plot system cost
         g = self.fig.add_subplot(self.r,self.c,1)
+        g.set_ylabel('Cost')
         g.title.set_text("Source: " + str(source) + ", Total cost: "+ str(costs[-1]))
         plt.plot(costs)
 
         #plot agents costs
         for i,ag in zip(range(2,2 + number_of_agents),agent_list):
             gi = self.fig.add_subplot(self.r,self.c,i)
+            gi.set_ylabel('Cost')
             title = "Agent Index: " + str(ag.get_index()) + ", Cost: " + str(ag.get_cost())
             gi.title.set_text(title)
             plt.plot(ag.cost_by_iteration)
