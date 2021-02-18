@@ -1,7 +1,7 @@
 from Graph import Graph
 
 def set_graph(file_name):
-    f = open("example.txt", "r")
+    f = open(file_name, "r")
     nodes,edges = f.readline().split()
     g = Graph(int(nodes),True)
     for i in range(int(edges)):
