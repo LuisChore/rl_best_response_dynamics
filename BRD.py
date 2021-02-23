@@ -1,21 +1,39 @@
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
+import networkx as nx
+import numpy as np
 from Agent import Agent
 from Graph import Graph
-from PlotProcess import PlotProcess
 import queue
-import time
 
 class BRD:
-
     def __init__(self,graph,agents,source):
-        self.agents = [ Agent(a) for a in agents]
+        self.nash_eq = False
+        self.W,self.H = 12,8
+        colors = ['blue','red','green','orange','cyan','black','pink','magenta']
         self.cost_by_iteration = []
-        self.graph = graph
-        self.plotProcess = PlotProcess(graph,len(agents))
         self.total_cost = float("inf")
         self.source = source
+        # initialize agents
+        self.agents = [ Agent(a) for a in agents]
+        iterator = 0
+        for ag in self.agents:
+            ag.set_color(colors[iterator])
+            iterator = (iterator + 1) % len(colors)
+        #initialize graph
+        self.graph = graph
+        self.graphx = self.create_graph(graph)
+        #Edges: dictionary to know how many agents are using every edge
         self.Edges = self.initialize_edges(graph)
-        #dictionary to know how many agents are using every edge
+
+    def create_graph(self,graph):
+        G = nx.DiGraph()
+        for i in range(graph.nodes):
+            G.add_node(i)
+        for u in range(graph.nodes):
+            for v,w in graph.adj[u]:
+                G.add_edge(u,v,weight = w)
+        return G
 
     def initialize_edges(self,graph):
         Edges = {}
@@ -26,27 +44,87 @@ class BRD:
                 Edges[(i,j)] = (w,0)
         return Edges
 
+    def plot_graph(self):
+        plt.ioff()
+        self.fig = plt.figure(figsize = (6,5))
+        label = '\n'.join(("Agents: " + str([ag.index for ag in self.agents]), "Source: " + str(self.source)))
+        self.fig.canvas.set_window_title('Graph')
+        self.fig.text(0.01,0.90, label)
+        pos = nx.planar_layout(self.graphx)
+        nx.draw(self.graphx,pos,with_labels = True)
+        labels = nx.get_edge_attributes(self.graphx,'weight')
+        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = labels)
+        plt.show()
+
+    def next_function(self,event):
+        self.nash_eq = True
+        for ag in self.agents:
+            find = self.find_path(ag)
+            ag.add_cost()
+            if find == True:
+                self.nash_eq = False
+        for ag in self.agents:
+            ag.update_agent_cost(self.Edges)
+        self.evaluate_totalcost()
+        self.cost_by_iteration.append(self.total_cost)
+
+        plt.clf()
+        self.plot_button()
+        self.plot_paths()
+        self.plot_total_cost()
+        self.plot_costs()
+        plt.draw()
+
+    def plot_button(self):
+        axnext = plt.axes([0.82, 0.01, 0.1, 0.065])
+        message = "Nash Equilibrium" if self.nash_eq else "Next Step"
+        self.bnext = Button(axnext, message)
+        self.bnext.on_clicked(self.next_function)
+
+    def plot_paths(self):
+        fgraph = self.fig.add_subplot(self.gs[0:2,:])
+        pos = nx.planar_layout(self.graphx)
+        title = "Source: " + str(self.source) + ", Total cost: " + str(self.total_cost)
+        fgraph.title.set_text(title)
+        nx.draw(self.graphx,pos,with_labels = True)
+        labels = nx.get_edge_attributes(self.graphx,'weight')
+        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = labels)
+
+        for ag in self.agents:
+            nx.draw_networkx_edges(self.graphx, pos,edgelist = ag.get_path(),width=4,
+            alpha=0.5, edge_color=ag.color, style='dashed',label = ag.index)
+
+    def plot_total_cost(self):
+        fmetrics = self.fig.add_subplot(self.gs[2,0])
+        fmetrics.set_ylabel('Total cost')
+        fmetrics.set_xlabel('Iterations')
+        fmetrics.title.set_text("Total cost: " + str(self.total_cost))
+        fmetrics.plot(self.cost_by_iteration)
+
+    def plot_costs(self):
+        fagents = self.fig.add_subplot(self.gs[2,1])
+        fagents.set_ylabel('Cost')
+        fagents.set_xlabel('Iterations')
+        fagents.title.set_text("Cost by agent")
+        for ag in self.agents:
+            label  = str(ag.index) + ": " +  str(round(ag.cost, 2))
+            fagents.plot(ag.cost_by_iteration, color = ag.color, label = label)
+            fagents.legend()
+
     def __call__(self):
-        self.plotProcess.set_plot()
-        find_better_path = True
-        self.plotProcess.draw_plot([],self.source,self.total_cost,title = "Original")
-        it = 1
-        while find_better_path == True:
-            find_better_path = False
-            for u in self.agents:
-                find = self.find_path(u)
-                u.add_cost()
-                if find == True:
-                    find_better_path = True
-            if find == False:
-                break
-            for u in self.agents:
-                u.update_agent_cost(self.Edges)
-            self.evaluate_totalcost()
-            self.cost_by_iteration.append(self.total_cost);
-            title = "Iteration: " + str(it)
-            self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,title = title)
-            it+=1
+        self.fig = plt.figure(figsize = (self.W,self.H))
+        self.fig.canvas.set_window_title("BRD")
+        self.gs = self.fig.add_gridspec(3, 2)
+        self.cost_by_iteration.append(self.total_cost)
+        for ag in self.agents:
+            ag.add_cost()
+
+        self.plot_button()
+        self.plot_paths()
+        self.plot_total_cost()
+        self.plot_costs()
+
+        plt.show()
 
     def update_edges(self,agent,change = True):
         l = len(agent.path)

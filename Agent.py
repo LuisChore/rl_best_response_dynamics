@@ -25,11 +25,12 @@ class Agent:
             cost +=  w/c
         self.cost = cost
 
-
-
     def get_cost(self):
         return self.cost
 
+    def set_color(self,c):
+        self.color = c
+        
     def get_index(self):
         return self.index
 
