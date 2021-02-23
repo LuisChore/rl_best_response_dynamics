@@ -38,6 +38,10 @@ class BRD:
                 u.add_cost()
                 if find == True:
                     find_better_path = True
+            if find == False:
+                break
+            for u in self.agents:
+                u.update_agent_cost(self.Edges)
             self.evaluate_totalcost()
             self.cost_by_iteration.append(self.total_cost);
             title = "Iteration: " + str(it)

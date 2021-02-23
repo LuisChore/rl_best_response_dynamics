@@ -18,6 +18,15 @@ class Agent:
                 S += ","
         return S
 
+    def update_agent_cost(self,Edges):
+        cost = 0
+        for e in self.edges_used:
+            w,c = Edges[e]
+            cost +=  w/c
+        self.cost = cost
+
+
+
     def get_cost(self):
         return self.cost
 
