@@ -52,8 +52,9 @@ class BRD:
         self.fig.text(0.01,0.90, label)
         pos = nx.planar_layout(self.graphx)
         nx.draw(self.graphx,pos,with_labels = True)
-        labels = nx.get_edge_attributes(self.graphx,'weight')
-        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = labels)
+        edge_labels = dict([((u,v,), f"{d['weight']:.2f}") for u,v,d in G.edges(data=True)])
+        #edge_labels = nx.get_edge_attributes(self.graphx,'weight')
+        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = edge_labels)
         plt.show()
 
     def next_function(self,event):
@@ -84,11 +85,12 @@ class BRD:
     def plot_paths(self):
         fgraph = self.fig.add_subplot(self.gs[0:2,:])
         pos = nx.planar_layout(self.graphx)
-        title = "Source: " + str(self.source) + ", Total cost: " + str(self.total_cost)
+        title = "Source: " + str(self.source) + ", Total cost: " + str(round(self.total_cost,2))
         fgraph.title.set_text(title)
         nx.draw(self.graphx,pos,with_labels = True)
-        labels = nx.get_edge_attributes(self.graphx,'weight')
-        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = labels)
+        edge_labels = dict([((u,v,), f"{d['weight']:.2f}") for u,v,d in self.graphx.edges(data=True)])
+        #edge_labels = nx.get_edge_attributes(self.graphx,'weight')
+        nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = edge_labels)
 
         for ag in self.agents:
             nx.draw_networkx_edges(self.graphx, pos,edgelist = ag.get_path(),width=4,
@@ -98,7 +100,7 @@ class BRD:
         fmetrics = self.fig.add_subplot(self.gs[2,0])
         fmetrics.set_ylabel('Total cost')
         fmetrics.set_xlabel('Iterations')
-        fmetrics.title.set_text("Total cost: " + str(self.total_cost))
+        fmetrics.title.set_text("Total cost: " + str(round(self.total_cost,2)))
         fmetrics.plot(self.cost_by_iteration)
 
     def plot_costs(self):
