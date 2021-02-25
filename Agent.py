@@ -30,7 +30,7 @@ class Agent:
 
     def set_color(self,c):
         self.color = c
-        
+
     def get_index(self):
         return self.index
 

@@ -15,7 +15,7 @@ class BRD:
         self.total_cost = float("inf")
         self.source = source
         # initialize agents
-        self.agents = [ Agent(a) for a in agents]
+        self.agents = agents
         iterator = 0
         for ag in self.agents:
             ag.set_color(colors[iterator])
@@ -25,6 +25,23 @@ class BRD:
         self.graphx = self.create_graph(graph)
         #Edges: dictionary to know how many agents are using every edge
         self.Edges = self.initialize_edges(graph)
+        self.initialize_agents()
+
+    def initialize_agents(self):
+        for ag in self.agents:
+            l = len(ag.path)
+            for i in range(0,l-1):
+                u = min(ag.path[i],ag.path[i + 1])
+                v = max(ag.path[i],ag.path[i + 1])
+                w,h = self.Edges[(u,v)]
+                self.Edges[(u,v)] = (w,h+1)
+                ag.edges_used[(u,v)] = True
+
+        for ag in self.agents:
+            l = len(ag.path)
+            if l > 0 or ag.index == self.source:
+                ag.update_agent_cost(self.Edges)
+        self.evaluate_totalcost()
 
     def create_graph(self,graph):
         G = nx.DiGraph()
@@ -61,11 +78,11 @@ class BRD:
         self.nash_eq = True
         for ag in self.agents:
             find = self.find_path(ag)
-            ag.add_cost()
             if find == True:
                 self.nash_eq = False
         for ag in self.agents:
             ag.update_agent_cost(self.Edges)
+            ag.add_cost()
         self.evaluate_totalcost()
         self.cost_by_iteration.append(self.total_cost)
 
@@ -191,12 +208,9 @@ class BRD:
 
     def evaluate_totalcost(self):
         ans = 0
-        for key in self.Edges:
-            w,h = self.Edges[key]
-            if h > 0:
-                ans += w
+        for ag in self.agents:
+            ans += ag.cost
         self.total_cost = ans
-        return ans
 
     def plot_metrics(self):
         self.plotProcess.plot_metrics(self.agents,self.source,self.cost_by_iteration)
