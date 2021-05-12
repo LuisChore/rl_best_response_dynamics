@@ -19,6 +19,7 @@ class Agent:
         return S
 
     def update_agent_cost(self,Edges):
+        # Edges: dictionary  edge -> (real_weight,agents_using_it )
         cost = 0
         for e in self.edges_used:
             w,c = Edges[e]

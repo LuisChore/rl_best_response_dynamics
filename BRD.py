@@ -40,6 +40,7 @@ class BRD:
         for ag in self.agents:
             l = len(ag.path)
             if l > 0 or ag.index == self.source:
+                #if it's in the source it doesn't need a path
                 ag.update_agent_cost(self.Edges)
         self.evaluate_totalcost()
 
@@ -69,7 +70,7 @@ class BRD:
         self.fig.text(0.01,0.90, label)
         pos = nx.planar_layout(self.graphx)
         nx.draw(self.graphx,pos,with_labels = True)
-        edge_labels = dict([((u,v,), f"{d['weight']:.2f}") for u,v,d in G.edges(data=True)])
+        edge_labels = dict([((u,v,), f"{d['weight']:.2f}") for u,v,d in self.graphx.edges(data=True)])
         #edge_labels = nx.get_edge_attributes(self.graphx,'weight')
         nx.draw_networkx_edge_labels(self.graphx,pos,edge_labels = edge_labels)
         plt.show()
@@ -211,9 +212,3 @@ class BRD:
         for ag in self.agents:
             ans += ag.cost
         self.total_cost = ans
-
-    def plot_metrics(self):
-        self.plotProcess.plot_metrics(self.agents,self.source,self.cost_by_iteration)
-
-    def plot_status(self):
-        self.plotProcess.draw_plot(self.agents,self.source,self.total_cost,block = True)
