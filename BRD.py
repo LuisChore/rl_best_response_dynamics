@@ -28,6 +28,7 @@ class BRD:
         self.initialize_agents()
 
     def initialize_agents(self):
+        self.edges_used = {}
         for ag in self.agents:
             l = len(ag.path)
             for i in range(0,l-1):
